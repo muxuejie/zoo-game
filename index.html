@@ -937,37 +937,51 @@
     var speechSynth = null;
     var speechVoices = [];
     var cachedVoice = null;
-    var speechUnlocked = false;
+    var speechReady = false;
+    var speechInitAttempts = 0;
 
     function initSpeech() {
+      if (speechReady) return;
       try {
         if ('speechSynthesis' in window && window.speechSynthesis) {
           speechSynth = window.speechSynthesis;
-          try {
-            speechVoices = speechSynth.getVoices();
-            cachedVoice = findEnglishVoice();
-          } catch(e) {}
+          loadVoices();
           
           speechSynth.onvoiceschanged = function() {
-            try {
-              speechVoices = speechSynth.getVoices();
-              cachedVoice = findEnglishVoice();
-            } catch(e) {}
+            loadVoices();
           };
+          
+          if (speechVoices.length === 0 && speechInitAttempts < 5) {
+            speechInitAttempts++;
+            setTimeout(initSpeech, 500);
+          }
         }
       } catch (e) {
         speechSynth = null;
       }
     }
 
-    function unlockSpeech() {
-      if (!speechSynth || speechUnlocked) return;
+    function loadVoices() {
       try {
-        var u = new SpeechSynthesisUtterance('');
-        u.volume = 0;
-        u.rate = 1;
+        if (speechSynth) {
+          speechVoices = speechSynth.getVoices();
+          cachedVoice = findEnglishVoice();
+          if (cachedVoice || speechVoices.length > 0) {
+            speechReady = true;
+          }
+        }
+      } catch(e) {}
+    }
+
+    function unlockSpeech() {
+      if (!speechSynth) return;
+      try {
+        var u = new SpeechSynthesisUtterance('a');
+        u.volume = 0.01;
+        u.rate = 2;
+        u.pitch = 0.5;
+        u.lang = 'en-US';
         speechSynth.speak(u);
-        speechUnlocked = true;
       } catch(e) {}
     }
 
@@ -998,18 +1012,34 @@
           return v4;
         }
       }
+      if (speechVoices.length > 0) {
+        return speechVoices[0];
+      }
       return null;
     }
 
     function speakAnimalName(name) {
-      if (!speechSynth || !name) return;
+      if (!name) return;
       
       try {
-        if (!cachedVoice && speechVoices && speechVoices.length > 0) {
-          cachedVoice = findEnglishVoice();
+        if (!speechSynth) {
+          if ('speechSynthesis' in window && window.speechSynthesis) {
+            speechSynth = window.speechSynthesis;
+          } else {
+            return;
+          }
         }
         
-        try { speechSynth.cancel(); } catch(e) {}
+        if (speechVoices.length === 0) {
+          try {
+            speechVoices = speechSynth.getVoices();
+            cachedVoice = findEnglishVoice();
+          } catch(e) {}
+        }
+        
+        if (!cachedVoice && speechVoices.length > 0) {
+          cachedVoice = findEnglishVoice();
+        }
         
         var utterance = new SpeechSynthesisUtterance(name);
         utterance.lang = 'en-US';
