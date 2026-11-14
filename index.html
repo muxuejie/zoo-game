@@ -937,6 +937,7 @@
     var speechSynth = null;
     var speechVoices = [];
     var cachedVoice = null;
+    var speechUnlocked = false;
 
     function initSpeech() {
       try {
@@ -960,7 +961,14 @@
     }
 
     function unlockSpeech() {
-      if (!speechSynth) return;
+      if (!speechSynth || speechUnlocked) return;
+      try {
+        var u = new SpeechSynthesisUtterance('');
+        u.volume = 0;
+        u.rate = 1;
+        speechSynth.speak(u);
+        speechUnlocked = true;
+      } catch(e) {}
     }
 
     function findEnglishVoice() {
@@ -997,6 +1005,12 @@
       if (!speechSynth || !name) return;
       
       try {
+        if (!cachedVoice && speechVoices && speechVoices.length > 0) {
+          cachedVoice = findEnglishVoice();
+        }
+        
+        try { speechSynth.cancel(); } catch(e) {}
+        
         var utterance = new SpeechSynthesisUtterance(name);
         utterance.lang = 'en-US';
         utterance.rate = 0.85;
