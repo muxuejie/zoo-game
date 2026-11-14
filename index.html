@@ -263,6 +263,31 @@
       box-shadow: 0 4px 0 #E17055, 0 6px 10px rgba(0,0,0,0.2);
     }
 
+    .voice-test-btn {
+      padding: 12px 30px;
+      font-size: clamp(1rem, 2.5vw, 1.3rem);
+      font-weight: bold;
+      color: white;
+      background: linear-gradient(135deg, #54A0FF, #5F27CD);
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow: 0 5px 0 #2E3A87, 0 8px 15px rgba(0,0,0,0.15);
+      transition: all 0.1s ease;
+      font-family: inherit;
+      margin-bottom: 15px;
+    }
+
+    .voice-test-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 7px 0 #2E3A87, 0 10px 18px rgba(0,0,0,0.2);
+    }
+
+    .voice-test-btn:active {
+      transform: translateY(3px);
+      box-shadow: 0 2px 0 #2E3A87, 0 4px 8px rgba(0,0,0,0.15);
+    }
+
     .hud {
       position: absolute;
       top: 20px;
@@ -876,6 +901,7 @@
         <span>🐸</span>
       </div>
       <button class="start-screen-sound" id="startSoundBtn" title="音乐开关">🎵</button>
+      <button class="voice-test-btn" id="voiceTestBtn">🔊 点我听：Panda</button>
       <button class="start-btn" id="startBtn">🎮 开始游戏</button>
     </div>
 
@@ -1559,6 +1585,28 @@
       unlockSpeech();
       toggleMusic();
     });
+
+    var voiceTestBtn = document.getElementById('voiceTestBtn');
+    if (voiceTestBtn) {
+      var testWords = ['Panda', 'Tiger', 'Elephant', 'Rabbit', 'Monkey', 'Giraffe', 'Penguin', 'Frog'];
+      var testIndex = 0;
+      voiceTestBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        initSpeech();
+        var word = testWords[testIndex % testWords.length];
+        testIndex++;
+        speakAnimalName(word);
+        voiceTestBtn.textContent = '🔊 下一个：' + testWords[testIndex % testWords.length];
+      });
+      voiceTestBtn.addEventListener('touchstart', function(e) {
+        e.stopPropagation();
+        initSpeech();
+        var word = testWords[testIndex % testWords.length];
+        testIndex++;
+        speakAnimalName(word);
+        voiceTestBtn.textContent = '🔊 下一个：' + testWords[testIndex % testWords.length];
+      }, { passive: true });
+    }
 
     function onFirstUserInteraction() {
       forceBackgroundColor();
