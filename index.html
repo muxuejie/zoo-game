@@ -963,24 +963,20 @@
     var speechSynth = null;
     var speechVoices = [];
     var cachedVoice = null;
-    var speechReady = false;
-    var speechInitAttempts = 0;
+    var ttsMode = 'unknown'; // 'speechSynthesis' | 'audio' | 'none'
+    var ttsTested = false;
+    var audioCache = {};
+    var currentAudio = null;
 
     function initSpeech() {
-      if (speechReady) return;
+      if (ttsTested) return;
       try {
         if ('speechSynthesis' in window && window.speechSynthesis) {
           speechSynth = window.speechSynthesis;
           loadVoices();
-          
           speechSynth.onvoiceschanged = function() {
             loadVoices();
           };
-          
-          if (speechVoices.length === 0 && speechInitAttempts < 5) {
-            speechInitAttempts++;
-            setTimeout(initSpeech, 500);
-          }
         }
       } catch (e) {
         speechSynth = null;
@@ -992,43 +988,32 @@
         if (speechSynth) {
           speechVoices = speechSynth.getVoices();
           cachedVoice = findEnglishVoice();
-          if (cachedVoice || speechVoices.length > 0) {
-            speechReady = true;
-          }
         }
-      } catch(e) {}
-    }
-
-    function unlockSpeech() {
-      if (!speechSynth) return;
-      try {
-        var u = new SpeechSynthesisUtterance('a');
-        u.volume = 0.01;
-        u.rate = 2;
-        u.pitch = 0.5;
-        u.lang = 'en-US';
-        speechSynth.speak(u);
       } catch(e) {}
     }
 
     function findEnglishVoice() {
       if (!speechVoices || speechVoices.length === 0) return null;
+      var preferredNames = ['Samantha', 'Google US English', 'Microsoft Zira', 'Alex', 'Victoria', 'Karen'];
       
-      for (var i = 0; i < speechVoices.length; i++) {
-        var v = speechVoices[i];
-        if (v.lang && v.lang.indexOf('en-US') === 0 && v.name && v.name.indexOf('Female') !== -1) {
-          return v;
+      for (var p = 0; p < preferredNames.length; p++) {
+        for (var i = 0; i < speechVoices.length; i++) {
+          var v = speechVoices[i];
+          if (v.name && v.name.indexOf(preferredNames[p]) !== -1 && v.lang && v.lang.indexOf('en') === 0) {
+            return v;
+          }
         }
       }
+      
       for (var j = 0; j < speechVoices.length; j++) {
         var v2 = speechVoices[j];
-        if (v2.lang && v2.lang.indexOf('en-US') === 0) {
+        if (v2.lang && v2.lang.indexOf('en-US') === 0 && v2.name && v2.name.toLowerCase().indexOf('female') !== -1) {
           return v2;
         }
       }
       for (var k = 0; k < speechVoices.length; k++) {
         var v3 = speechVoices[k];
-        if (v3.lang && v3.lang.indexOf('en') === 0 && v3.name && v3.name.indexOf('Female') !== -1) {
+        if (v3.lang && v3.lang.indexOf('en-US') === 0) {
           return v3;
         }
       }
@@ -1044,18 +1029,82 @@
       return null;
     }
 
+    function testAndUnlockSpeech() {
+      if (ttsTested) return;
+      
+      if (speechSynth && speechVoices.length > 0) {
+        try {
+          var u = new SpeechSynthesisUtterance('a');
+          u.volume = 0.5;
+          u.rate = 1;
+          u.pitch = 1;
+          u.lang = 'en-US';
+          if (cachedVoice) u.voice = cachedVoice;
+          
+          var started = false;
+          u.onstart = function() {
+            started = true;
+            ttsMode = 'speechSynthesis';
+            ttsTested = true;
+            try { speechSynth.cancel(); } catch(e) {}
+          };
+          u.onerror = function() {
+            if (!ttsTested) {
+              fallbackToAudio();
+            }
+          };
+          
+          speechSynth.speak(u);
+          
+          setTimeout(function() {
+            if (!ttsTested) {
+              try {
+                if (speechSynth.speaking) {
+                  ttsMode = 'speechSynthesis';
+                  ttsTested = true;
+                  speechSynth.cancel();
+                } else {
+                  fallbackToAudio();
+                }
+              } catch(e) {
+                fallbackToAudio();
+              }
+            }
+          }, 800);
+          
+          return;
+        } catch(e) {
+          fallbackToAudio();
+          return;
+        }
+      }
+      
+      fallbackToAudio();
+    }
+
+    function fallbackToAudio() {
+      ttsMode = 'audio';
+      ttsTested = true;
+    }
+
     function speakAnimalName(name) {
       if (!name) return;
       
+      if (!ttsTested) {
+        testAndUnlockSpeech();
+        setTimeout(function() { speakAnimalName(name); }, 300);
+        return;
+      }
+      
+      if (ttsMode === 'speechSynthesis' && speechSynth) {
+        speakWithSynth(name);
+      } else if (ttsMode === 'audio') {
+        speakWithAudio(name);
+      }
+    }
+
+    function speakWithSynth(name) {
       try {
-        if (!speechSynth) {
-          if ('speechSynthesis' in window && window.speechSynthesis) {
-            speechSynth = window.speechSynthesis;
-          } else {
-            return;
-          }
-        }
-        
         if (speechVoices.length === 0) {
           try {
             speechVoices = speechSynth.getVoices();
@@ -1067,6 +1116,8 @@
           cachedVoice = findEnglishVoice();
         }
         
+        try { speechSynth.cancel(); } catch(e) {}
+        
         var utterance = new SpeechSynthesisUtterance(name);
         utterance.lang = 'en-US';
         utterance.rate = 0.85;
@@ -1077,7 +1128,50 @@
           utterance.voice = cachedVoice;
         }
         
+        utterance.onerror = function() {
+          ttsMode = 'audio';
+          speakWithAudio(name);
+        };
+        
         speechSynth.speak(utterance);
+      } catch (e) {
+        ttsMode = 'audio';
+        speakWithAudio(name);
+      }
+    }
+
+    function speakWithAudio(name) {
+      try {
+        if (currentAudio) {
+          try { currentAudio.pause(); } catch(e) {}
+          currentAudio = null;
+        }
+        
+        var audio;
+        if (audioCache[name]) {
+          audio = audioCache[name];
+          try { audio.currentTime = 0; } catch(e) {}
+        } else {
+          audio = new Audio();
+          audio.preload = 'auto';
+          audio.src = 'https://dict.youdao.com/dictvoice?audio=' + encodeURIComponent(name) + '&type=1';
+          audioCache[name] = audio;
+        }
+        
+        currentAudio = audio;
+        audio.volume = 1;
+        
+        var playPromise = audio.play();
+        if (playPromise && playPromise.catch) {
+          playPromise.catch(function(e) {
+            try {
+              var audio2 = new Audio('https://api.dictionaryapi.dev/media/pronunciations/en/' + encodeURIComponent(name.toLowerCase()) + '-us.mp3');
+              audio2.volume = 1;
+              audio2.play().catch(function(){});
+              currentAudio = audio2;
+            } catch(e2) {}
+          });
+        }
       } catch (e) {}
     }
 
@@ -1159,7 +1253,7 @@
         startBackgroundMusic();
       }
       initSpeech();
-      unlockSpeech();
+      testAndUnlockSpeech();
 
       startSpawning();
       gameLoop();
@@ -1388,13 +1482,13 @@
     startBtn.addEventListener('click', startGame);
     startBtn.addEventListener('touchstart', function(e) {
       initSpeech();
-      unlockSpeech();
+      testAndUnlockSpeech();
       fixScreenSize();
     }, { passive: true });
     restartBtn.addEventListener('click', startGame);
     restartBtn.addEventListener('touchstart', function(e) {
       initSpeech();
-      unlockSpeech();
+      testAndUnlockSpeech();
       fixScreenSize();
     }, { passive: true });
 
@@ -1575,14 +1669,14 @@
     document.getElementById('startSoundBtn').addEventListener('click', function(e) {
       e.stopPropagation();
       initSpeech();
-      unlockSpeech();
+      testAndUnlockSpeech();
       toggleMusic();
     });
 
     document.getElementById('gameSoundBtn').addEventListener('click', function(e) {
       e.stopPropagation();
       initSpeech();
-      unlockSpeech();
+      testAndUnlockSpeech();
       toggleMusic();
     });
 
@@ -1612,7 +1706,7 @@
       forceBackgroundColor();
       fixScreenSize();
       initSpeech();
-      unlockSpeech();
+      testAndUnlockSpeech();
     }
 
     document.addEventListener('touchstart', function firstTouch(e) {
