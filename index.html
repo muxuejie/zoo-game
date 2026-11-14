@@ -1,0 +1,1548 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" content="#87CEEB">
+  <title>🐾 动物园抓抓乐 - 认识可爱的动物朋友们</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+    }
+
+    html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #87CEEB;
+      background: #87CEEB;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      min-height: 100%;
+      background-color: #87CEEB;
+      background: #87CEEB;
+      font-family: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', 'Hiragino Sans GB', 'Microsoft YaHei', cursive, sans-serif;
+      -webkit-text-size-adjust: 100%;
+      -webkit-tap-highlight-color: rgba(0,0,0,0);
+      -webkit-touch-callout: none;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .game-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #87CEEB;
+      background-image: -webkit-linear-gradient(top, #87CEEB 0%, #B0E0E6 50%, #98FB98 100%);
+      background-image: linear-gradient(to bottom, #87CEEB 0%, #B0E0E6 50%, #98FB98 100%);
+      background-repeat: no-repeat;
+      background-position: top;
+      background-size: 100% 100%;
+      overflow: hidden;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .cloud {
+      position: absolute;
+      background: white;
+      border-radius: 50%;
+      opacity: 0.8;
+      animation: floatCloud 20s linear infinite;
+    }
+
+    .cloud::before, .cloud::after {
+      content: '';
+      position: absolute;
+      background: white;
+      border-radius: 50%;
+    }
+
+    .cloud1 {
+      width: 80px;
+      height: 40px;
+      top: 10%;
+      left: -100px;
+      animation-duration: 25s;
+    }
+    .cloud1::before { width: 50px; height: 50px; top: -25px; left: 15px; }
+    .cloud1::after { width: 35px; height: 35px; top: -15px; left: 50px; }
+
+    .cloud2 {
+      width: 100px;
+      height: 50px;
+      top: 20%;
+      left: -150px;
+      animation-duration: 30s;
+      animation-delay: -10s;
+    }
+    .cloud2::before { width: 60px; height: 60px; top: -30px; left: 20px; }
+    .cloud2::after { width: 45px; height: 45px; top: -20px; left: 60px; }
+
+    .cloud3 {
+      width: 70px;
+      height: 35px;
+      top: 5%;
+      left: -80px;
+      animation-duration: 20s;
+      animation-delay: -5s;
+    }
+    .cloud3::before { width: 40px; height: 40px; top: -20px; left: 10px; }
+    .cloud3::after { width: 30px; height: 30px; top: -10px; left: 40px; }
+
+    @keyframes floatCloud {
+      from { transform: translateX(0); }
+      to { transform: translateX(calc(100vw + 200px)); }
+    }
+
+    .grass {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 80px;
+      background: linear-gradient(180deg, #7CCD7C 0%, #4CAF50 100%);
+      border-top: 4px solid #388E3C;
+    }
+
+    .grass::before {
+      content: '';
+      position: absolute;
+      top: -20px;
+      left: 0;
+      width: 100%;
+      height: 30px;
+      background: repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 20px,
+        #66BB6A 20px,
+        #66BB6A 25px,
+        transparent 25px,
+        transparent 40px
+      );
+    }
+
+    .flower {
+      position: absolute;
+      bottom: 60px;
+      font-size: 24px;
+      animation: sway 3s ease-in-out infinite;
+    }
+
+    @keyframes sway {
+      0%, 100% { transform: rotate(-5deg); }
+      50% { transform: rotate(5deg); }
+    }
+
+    .screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+
+    .screen.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.95);
+    }
+
+    .title {
+      font-size: clamp(2.5rem, 8vw, 5rem);
+      font-weight: bold;
+      background: linear-gradient(135deg, #FF6B6B, #FF9F43, #FECA57, #48DBFB, #1DD1A1);
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: none;
+      animation: gradientShift 3s ease infinite, bounce 2s ease-in-out infinite;
+      margin-bottom: 20px;
+      text-align: center;
+      padding: 0 20px;
+    }
+
+    @keyframes gradientShift {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .subtitle {
+      font-size: clamp(1rem, 3vw, 1.5rem);
+      color: #555;
+      margin-bottom: 40px;
+      text-align: center;
+      padding: 0 20px;
+    }
+
+    .animal-preview {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 40px;
+      font-size: clamp(2rem, 6vw, 3.5rem);
+      animation: floatAnimals 3s ease-in-out infinite;
+    }
+
+    .animal-preview span {
+      animation: wobble 2s ease-in-out infinite;
+    }
+
+    .animal-preview span:nth-child(1) { animation-delay: 0s; }
+    .animal-preview span:nth-child(2) { animation-delay: 0.1s; }
+    .animal-preview span:nth-child(3) { animation-delay: 0.2s; }
+    .animal-preview span:nth-child(4) { animation-delay: 0.3s; }
+    .animal-preview span:nth-child(5) { animation-delay: 0.4s; }
+    .animal-preview span:nth-child(6) { animation-delay: 0.5s; }
+    .animal-preview span:nth-child(7) { animation-delay: 0.6s; }
+    .animal-preview span:nth-child(8) { animation-delay: 0.7s; }
+    .animal-preview span:nth-child(9) { animation-delay: 0.8s; }
+    .animal-preview span:nth-child(10) { animation-delay: 0.9s; }
+
+    @keyframes floatAnimals {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+
+    @keyframes wobble {
+      0%, 100% { transform: rotate(-8deg); }
+      50% { transform: rotate(8deg); }
+    }
+
+    .start-btn {
+      padding: 20px 60px;
+      font-size: clamp(1.5rem, 4vw, 2.5rem);
+      font-weight: bold;
+      color: white;
+      background: linear-gradient(135deg, #FF9F43, #FF6B6B);
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 8px 0 #E17055, 0 12px 20px rgba(0,0,0,0.2);
+      transition: all 0.1s ease;
+      font-family: inherit;
+    }
+
+    .start-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 11px 0 #E17055, 0 15px 25px rgba(0,0,0,0.25);
+    }
+
+    .start-btn:active {
+      transform: translateY(4px);
+      box-shadow: 0 4px 0 #E17055, 0 6px 10px rgba(0,0,0,0.2);
+    }
+
+    .hud {
+      position: absolute;
+      top: 20px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      padding: 0 20px;
+      z-index: 20;
+      pointer-events: none;
+    }
+
+    .timer-box {
+      background: white;
+      border-radius: 20px;
+      padding: 12px 24px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 3px solid #FF9F43;
+    }
+
+    .timer-icon {
+      font-size: 1.5rem;
+    }
+
+    .timer-text {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #FF6B6B;
+      min-width: 50px;
+      text-align: center;
+    }
+
+    .timer-text.warning {
+      color: #FF4757;
+      animation: pulse 0.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+    }
+
+    .score-box {
+      background: white;
+      border-radius: 20px;
+      padding: 12px 24px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 3px solid #26DE81;
+    }
+
+    .score-icon {
+      font-size: 1.5rem;
+    }
+
+    .score-text {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #2ED573;
+      min-width: 60px;
+      text-align: center;
+      transition: transform 0.2s ease;
+    }
+
+    .score-text.pop {
+      animation: scorePop 0.3s ease;
+    }
+
+    @keyframes scorePop {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.3); color: #FF6B6B; }
+      100% { transform: scale(1); }
+    }
+
+    .game-area {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 5;
+    }
+
+    .falling-animal {
+      position: absolute;
+      cursor: pointer;
+      transition: transform 0.1s ease;
+      filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.2));
+      will-change: transform;
+    }
+
+    .falling-animal.small { font-size: 4.5rem; }
+    .falling-animal.medium { font-size: 6.5rem; }
+    .falling-animal.large { font-size: 8.5rem; }
+
+    .falling-animal:hover {
+      transform: scale(1.1);
+    }
+
+    .falling-animal.caught {
+      animation: caught 0.4s ease forwards;
+      pointer-events: none;
+    }
+
+    @keyframes caught {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.5) rotate(360deg); opacity: 0.8; }
+      100% { transform: scale(0) rotate(720deg); opacity: 0; }
+    }
+
+    .score-popup {
+      position: absolute;
+      pointer-events: none;
+      z-index: 25;
+      animation: scoreFloat 1.2s ease-out forwards;
+      text-align: center;
+    }
+
+    .score-popup .points {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #2ED573;
+      text-shadow: 2px 2px 0 white, -2px -2px 0 white, 2px -2px 0 white, -2px 2px 0 white;
+    }
+
+    .score-popup .animal-name {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #5F27CD;
+      text-shadow: 1px 1px 0 white, -1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white;
+      margin-top: 4px;
+      text-transform: capitalize;
+    }
+
+    @keyframes scoreFloat {
+      0% {
+        opacity: 1;
+        transform: translateY(0) scale(0.5);
+      }
+      20% {
+        transform: translateY(-20px) scale(1.2);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-80px) scale(1);
+      }
+    }
+
+    .game-area {
+      cursor: none;
+    }
+
+    .hand-cursor {
+      position: fixed;
+      pointer-events: none;
+      font-size: 3rem;
+      z-index: 100;
+      transform: translate(-50%, -50%);
+      transition: transform 0.05s ease;
+      filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
+    }
+
+    .hand-cursor.grabbing {
+      transform: translate(-50%, -50%) scale(0.8) rotate(-20deg);
+    }
+
+    .end-card {
+      background: white;
+      border-radius: 30px;
+      padding: 40px 50px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      text-align: center;
+      border: 5px solid #FF9F43;
+      max-width: 90%;
+    }
+
+    .end-title {
+      font-size: clamp(1.8rem, 5vw, 3rem);
+      color: #FF6B6B;
+      margin-bottom: 20px;
+    }
+
+    .end-emoji {
+      font-size: clamp(3rem, 8vw, 5rem);
+      margin-bottom: 20px;
+      animation: bounce 1s ease-in-out infinite;
+    }
+
+    .final-score {
+      font-size: clamp(3rem, 10vw, 5rem);
+      font-weight: bold;
+      background: linear-gradient(135deg, #26DE81, #2ED573, #7BED9F);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
+    }
+
+    .score-label {
+      font-size: 1.2rem;
+      color: #888;
+      margin-bottom: 20px;
+    }
+
+    .encouragement {
+      font-size: clamp(1rem, 2.5vw, 1.4rem);
+      color: #555;
+      margin-bottom: 30px;
+      padding: 15px;
+      background: #FFF5E6;
+      border-radius: 15px;
+      border: 2px dashed #FF9F43;
+    }
+
+    .restart-btn {
+      padding: 15px 50px;
+      font-size: clamp(1.2rem, 3vw, 1.8rem);
+      font-weight: bold;
+      color: white;
+      background: linear-gradient(135deg, #26DE81, #2ED573);
+      border: none;
+      border-radius: 40px;
+      cursor: pointer;
+      box-shadow: 0 6px 0 #00B894, 0 10px 20px rgba(0,0,0,0.15);
+      transition: all 0.1s ease;
+      font-family: inherit;
+    }
+
+    .restart-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 0 #00B894, 0 12px 25px rgba(0,0,0,0.2);
+    }
+
+    .restart-btn:active {
+      transform: translateY(3px);
+      box-shadow: 0 3px 0 #00B894, 0 5px 10px rgba(0,0,0,0.15);
+    }
+
+    .combo-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 4rem;
+      font-weight: bold;
+      color: #FF6B6B;
+      text-shadow: 3px 3px 0 white, -3px -3px 0 white, 3px -3px 0 white, -3px 3px 0 white;
+      pointer-events: none;
+      z-index: 30;
+      animation: comboAnim 0.8s ease-out forwards;
+    }
+
+    @keyframes comboAnim {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.3); }
+      30% { opacity: 1; transform: translate(-50%, -50%) scale(1.3); }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(1) translateY(-50px); }
+    }
+
+    .sound-btn {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: 3px solid #5F27CD;
+      background: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      z-index: 30;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .sound-btn:hover {
+      transform: translateX(-50%) scale(1.1);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+    }
+
+    .sound-btn:active {
+      transform: translateX(-50%) scale(0.95);
+    }
+
+    .start-screen-sound {
+      width: 55px;
+      height: 55px;
+      border-radius: 50%;
+      border: 3px solid #5F27CD;
+      background: white;
+      font-size: 1.6rem;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 25px;
+    }
+
+    .start-screen-sound:hover {
+      transform: scale(1.1);
+    }
+
+    .start-screen-sound:active {
+      transform: scale(0.95);
+    }
+
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .hud {
+        top: 15px;
+        padding: 0 15px;
+      }
+
+      .timer-box, .score-box {
+        padding: 10px 20px;
+        border-radius: 18px;
+      }
+
+      .timer-text, .score-text {
+        font-size: 1.5rem;
+      }
+
+      .timer-icon, .score-icon {
+        font-size: 1.3rem;
+      }
+
+      .grass {
+        height: 65px;
+      }
+
+      .flower {
+        bottom: 48px;
+        font-size: 22px;
+      }
+
+      .falling-animal.small { font-size: 4rem; }
+      .falling-animal.medium { font-size: 5.8rem; }
+      .falling-animal.large { font-size: 7.5rem; }
+
+      .hand-cursor {
+        font-size: 2.8rem;
+      }
+
+      .title {
+        font-size: 3.5rem;
+      }
+
+      .animal-preview {
+        font-size: 3rem;
+      }
+
+      .start-btn {
+        padding: 18px 50px;
+        font-size: 2rem;
+      }
+
+      .end-card {
+        padding: 35px 45px;
+      }
+
+      .sound-btn {
+        width: 48px;
+        height: 48px;
+        font-size: 1.4rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .hud {
+        top: 10px;
+        padding: 0 10px;
+      }
+
+      .timer-box, .score-box {
+        padding: 8px 14px;
+        border-radius: 14px;
+        border-width: 2px;
+      }
+
+      .timer-text, .score-text {
+        font-size: 1.2rem;
+        min-width: 40px;
+      }
+
+      .timer-icon, .score-icon {
+        font-size: 1.1rem;
+      }
+
+      .grass {
+        height: 45px;
+      }
+
+      .flower {
+        bottom: 30px;
+        font-size: 16px;
+      }
+
+      .falling-animal.small { font-size: 3.2rem; }
+      .falling-animal.medium { font-size: 4.5rem; }
+      .falling-animal.large { font-size: 6rem; }
+
+      .hand-cursor {
+        display: none;
+      }
+
+      .game-area {
+        cursor: default;
+      }
+
+      .title {
+        font-size: 2.2rem;
+        margin-bottom: 15px;
+      }
+
+      .subtitle {
+        font-size: 1rem;
+        margin-bottom: 25px;
+      }
+
+      .animal-preview {
+        font-size: 2.2rem;
+        gap: 10px;
+        margin-bottom: 25px;
+      }
+
+      .start-btn {
+        padding: 15px 40px;
+        font-size: 1.3rem;
+        border-radius: 40px;
+      }
+
+      .end-card {
+        padding: 25px 30px;
+        border-radius: 25px;
+        border-width: 4px;
+      }
+
+      .end-title {
+        font-size: 1.5rem;
+        margin-bottom: 15px;
+      }
+
+      .end-emoji {
+        margin-bottom: 15px;
+      }
+
+      .score-label {
+        font-size: 1rem;
+        margin-bottom: 15px;
+      }
+
+      .encouragement {
+        font-size: 0.9rem;
+        padding: 12px;
+        margin-bottom: 20px;
+      }
+
+      .restart-btn {
+        padding: 12px 35px;
+        font-size: 1.1rem;
+        border-radius: 30px;
+      }
+
+      .sound-btn {
+        width: 42px;
+        height: 42px;
+        font-size: 1.2rem;
+        top: 12px;
+        border-width: 2px;
+      }
+
+      .start-screen-sound {
+        width: 48px;
+        height: 48px;
+        font-size: 1.4rem;
+        margin-bottom: 20px;
+      }
+
+      .score-popup .points {
+        font-size: 1.5rem;
+      }
+
+      .score-popup .animal-name {
+        font-size: 1rem;
+      }
+
+      .combo-text {
+        font-size: 2.5rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hud {
+        top: 8px;
+        padding: 0 8px;
+      }
+
+      .timer-box, .score-box {
+        padding: 6px 12px;
+        border-radius: 12px;
+      }
+
+      .timer-text, .score-text {
+        font-size: 1rem;
+        min-width: 35px;
+      }
+
+      .timer-icon, .score-icon {
+        font-size: 1rem;
+      }
+
+      .grass {
+        height: 35px;
+      }
+
+      .flower {
+        bottom: 22px;
+        font-size: 14px;
+      }
+
+      .falling-animal.small { font-size: 2.8rem; }
+      .falling-animal.medium { font-size: 3.8rem; }
+      .falling-animal.large { font-size: 5rem; }
+
+      .title {
+        font-size: 1.8rem;
+      }
+
+      .subtitle {
+        font-size: 0.9rem;
+        margin-bottom: 20px;
+      }
+
+      .animal-preview {
+        font-size: 1.8rem;
+        gap: 8px;
+        margin-bottom: 20px;
+      }
+
+      .animal-preview span:nth-child(n+7) {
+        display: none;
+      }
+
+      .start-btn {
+        padding: 12px 35px;
+        font-size: 1.1rem;
+      }
+
+      .end-card {
+        padding: 20px 25px;
+      }
+
+      .sound-btn {
+        width: 38px;
+        height: 38px;
+        font-size: 1.1rem;
+        top: 10px;
+      }
+
+      .score-popup .points {
+        font-size: 1.3rem;
+      }
+
+      .score-popup .animal-name {
+        font-size: 0.9rem;
+      }
+
+      .combo-text {
+        font-size: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container" id="gameContainer">
+    <div class="cloud cloud1"></div>
+    <div class="cloud cloud2"></div>
+    <div class="cloud cloud3"></div>
+    
+    <div class="grass"></div>
+    <div class="flower" style="left: 10%; animation-delay: 0s;">🌸</div>
+    <div class="flower" style="left: 25%; animation-delay: 0.5s;">🌼</div>
+    <div class="flower" style="left: 45%; animation-delay: 1s;">🌺</div>
+    <div class="flower" style="left: 65%; animation-delay: 0.3s;">🌻</div>
+    <div class="flower" style="left: 85%; animation-delay: 0.8s;">🌷</div>
+
+    <div class="hand-cursor" id="handCursor">✋</div>
+
+    <div class="screen" id="startScreen">
+      <h1 class="title">🐾 动物园抓抓乐 🎯</h1>
+      <p class="subtitle">抓住可爱的小动物，认识它们的英文名字！</p>
+      <div class="animal-preview">
+        <span>🦁</span>
+        <span>🐘</span>
+        <span>🦒</span>
+        <span>🐼</span>
+        <span>🦊</span>
+        <span>🐧</span>
+        <span>🐻</span>
+        <span>🦘</span>
+        <span>🦔</span>
+        <span>🐸</span>
+      </div>
+      <button class="start-screen-sound" id="startSoundBtn" title="音乐开关">🎵</button>
+      <button class="start-btn" id="startBtn">🎮 开始游戏</button>
+    </div>
+
+    <div class="screen hidden" id="gameScreen">
+      <button class="sound-btn" id="gameSoundBtn" title="音乐开关">🎵</button>
+      <div class="hud">
+        <div class="timer-box">
+          <span class="timer-icon">⏰</span>
+          <span class="timer-text" id="timerText">60</span>
+        </div>
+        <div class="score-box">
+          <span class="score-icon">⭐</span>
+          <span class="score-text" id="scoreText">0</span>
+        </div>
+      </div>
+      <div class="game-area" id="gameArea"></div>
+    </div>
+
+    <div class="screen hidden" id="endScreen">
+      <div class="end-card">
+        <div class="end-emoji" id="endEmoji">🎉</div>
+        <h2 class="end-title">游戏结束！</h2>
+        <div class="final-score" id="finalScore">0</div>
+        <div class="score-label">总得分</div>
+        <div class="encouragement" id="encouragement">你真棒！</div>
+        <button class="restart-btn" id="restartBtn">🔄 再玩一次</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var animals = [
+      { name: 'Giraffe', emoji: '🦒', size: 'large', points: 30 },
+      { name: 'Dinosaur', emoji: '🦕', size: 'large', points: 30 },
+      { name: 'Elephant', emoji: '🐘', size: 'large', points: 30 },
+      { name: 'Rhinoceros', emoji: '🦏', size: 'large', points: 30 },
+      { name: 'Hippopotamus', emoji: '🦛', size: 'large', points: 30 },
+      { name: 'Camel', emoji: '🐫', size: 'large', points: 30 },
+      { name: 'Lion', emoji: '🦁', size: 'medium', points: 20 },
+      { name: 'Tiger', emoji: '🐯', size: 'medium', points: 20 },
+      { name: 'Zebra', emoji: '🦓', size: 'medium', points: 20 },
+      { name: 'Panda', emoji: '🐼', size: 'medium', points: 25 },
+      { name: 'Bear', emoji: '🐻', size: 'medium', points: 25 },
+      { name: 'Kangaroo', emoji: '🦘', size: 'medium', points: 20 },
+      { name: 'Llama', emoji: '🦙', size: 'medium', points: 25 },
+      { name: 'Raccoon', emoji: '🦝', size: 'medium', points: 20 },
+      { name: 'Monkey', emoji: '🐵', size: 'small', points: 10 },
+      { name: 'Rabbit', emoji: '🐰', size: 'small', points: 10 },
+      { name: 'Koala', emoji: '🐨', size: 'small', points: 15 },
+      { name: 'Fox', emoji: '🦊', size: 'small', points: 15 },
+      { name: 'Penguin', emoji: '🐧', size: 'small', points: 10 },
+      { name: 'Squirrel', emoji: '🐿️', size: 'small', points: 15 },
+      { name: 'Hedgehog', emoji: '🦔', size: 'small', points: 15 },
+      { name: 'Turtle', emoji: '🐢', size: 'small', points: 10 },
+      { name: 'Frog', emoji: '🐸', size: 'small', points: 10 },
+      { name: 'Chick', emoji: '🐥', size: 'small', points: 10 },
+    ];
+
+    var speechSynth = null;
+    var speechVoices = [];
+    var cachedVoice = null;
+
+    function initSpeech() {
+      try {
+        if ('speechSynthesis' in window && window.speechSynthesis) {
+          speechSynth = window.speechSynthesis;
+          try {
+            speechVoices = speechSynth.getVoices();
+            cachedVoice = findEnglishVoice();
+          } catch(e) {}
+          
+          speechSynth.onvoiceschanged = function() {
+            try {
+              speechVoices = speechSynth.getVoices();
+              cachedVoice = findEnglishVoice();
+            } catch(e) {}
+          };
+        }
+      } catch (e) {
+        speechSynth = null;
+      }
+    }
+
+    function unlockSpeech() {
+      if (!speechSynth) return;
+    }
+
+    function findEnglishVoice() {
+      if (!speechVoices || speechVoices.length === 0) return null;
+      
+      for (var i = 0; i < speechVoices.length; i++) {
+        var v = speechVoices[i];
+        if (v.lang && v.lang.indexOf('en-US') === 0 && v.name && v.name.indexOf('Female') !== -1) {
+          return v;
+        }
+      }
+      for (var j = 0; j < speechVoices.length; j++) {
+        var v2 = speechVoices[j];
+        if (v2.lang && v2.lang.indexOf('en-US') === 0) {
+          return v2;
+        }
+      }
+      for (var k = 0; k < speechVoices.length; k++) {
+        var v3 = speechVoices[k];
+        if (v3.lang && v3.lang.indexOf('en') === 0 && v3.name && v3.name.indexOf('Female') !== -1) {
+          return v3;
+        }
+      }
+      for (var m = 0; m < speechVoices.length; m++) {
+        var v4 = speechVoices[m];
+        if (v4.lang && v4.lang.indexOf('en') === 0) {
+          return v4;
+        }
+      }
+      return null;
+    }
+
+    function speakAnimalName(name) {
+      if (!speechSynth || !name) return;
+      
+      try {
+        var utterance = new SpeechSynthesisUtterance(name);
+        utterance.lang = 'en-US';
+        utterance.rate = 0.85;
+        utterance.pitch = 1.1;
+        utterance.volume = 1;
+        
+        if (cachedVoice) {
+          utterance.voice = cachedVoice;
+        }
+        
+        speechSynth.speak(utterance);
+      } catch (e) {}
+    }
+
+    var gameState = 'idle';
+    var score = 0;
+    var timeLeft = 60;
+    var fallingAnimals = [];
+    var animationId = null;
+    var spawnTimer = null;
+    var gameTimer = null;
+    var difficulty = 1;
+    var comboCount = 0;
+    var lastCatchTime = 0;
+
+    var startScreen = document.getElementById('startScreen');
+    var gameScreen = document.getElementById('gameScreen');
+    var endScreen = document.getElementById('endScreen');
+    var gameArea = document.getElementById('gameArea');
+    var timerText = document.getElementById('timerText');
+    var scoreText = document.getElementById('scoreText');
+    var finalScore = document.getElementById('finalScore');
+    var startBtn = document.getElementById('startBtn');
+    var restartBtn = document.getElementById('restartBtn');
+    var handCursor = document.getElementById('handCursor');
+    var endEmoji = document.getElementById('endEmoji');
+    var encouragement = document.getElementById('encouragement');
+
+    var gameContainer = document.getElementById('gameContainer');
+
+    function updateHandPosition(e) {
+      var x = e.clientX || (e.touches && e.touches[0].clientX);
+      var y = e.clientY || (e.touches && e.touches[0].clientY);
+      if (x !== undefined && y !== undefined) {
+        handCursor.style.left = x + 'px';
+        handCursor.style.top = y + 'px';
+      }
+    }
+
+    gameContainer.addEventListener('mousemove', updateHandPosition);
+    gameContainer.addEventListener('touchmove', updateHandPosition, { passive: true });
+
+    function setHandGrabbing(grabbing) {
+      if (grabbing) {
+        handCursor.textContent = '🤏';
+        handCursor.classList.add('grabbing');
+      } else {
+        handCursor.textContent = '✋';
+        handCursor.classList.remove('grabbing');
+      }
+    }
+
+    gameArea.addEventListener('mousedown', function() { setHandGrabbing(true); });
+    gameArea.addEventListener('mouseup', function() { setHandGrabbing(false); });
+    gameArea.addEventListener('touchstart', function() { setHandGrabbing(true); }, { passive: true });
+    gameArea.addEventListener('touchend', function() { setHandGrabbing(false); });
+
+    function startGame() {
+      gameState = 'playing';
+      score = 0;
+      timeLeft = 60;
+      difficulty = 1;
+      comboCount = 0;
+      fallingAnimals = [];
+      gameArea.innerHTML = '';
+      
+      scoreText.textContent = '0';
+      timerText.textContent = '60';
+      timerText.classList.remove('warning');
+
+      startScreen.classList.add('hidden');
+      endScreen.classList.add('hidden');
+      gameScreen.classList.remove('hidden');
+
+      initAudio();
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      if (musicEnabled) {
+        startBackgroundMusic();
+      }
+      initSpeech();
+      unlockSpeech();
+
+      startSpawning();
+      gameLoop();
+      startTimer();
+    }
+
+    function startTimer() {
+      gameTimer = setInterval(function() {
+        timeLeft--;
+        timerText.textContent = timeLeft;
+
+        if (timeLeft <= 10) {
+          timerText.classList.add('warning');
+        }
+
+        if (timeLeft % 10 === 0 && timeLeft > 0) {
+          difficulty = Math.min(difficulty + 0.5, 4);
+        }
+
+        if (timeLeft <= 0) {
+          endGame();
+        }
+      }, 1000);
+    }
+
+    function startSpawning() {
+      var spawn = function() {
+        if (gameState !== 'playing') return;
+        
+        spawnAnimal();
+        
+        var baseInterval = 2000;
+        var minInterval = 600;
+        var interval = Math.max(minInterval, baseInterval / difficulty + Math.random() * 500);
+        
+        spawnTimer = setTimeout(spawn, interval);
+      };
+      
+      spawn();
+    }
+
+    function spawnAnimal() {
+      var animal = animals[Math.floor(Math.random() * animals.length)];
+      var gameRect = gameArea.getBoundingClientRect();
+      
+      var animalWidth;
+      if (animal.size === 'small') animalWidth = 48;
+      else if (animal.size === 'medium') animalWidth = 72;
+      else animalWidth = 96;
+
+      var x = Math.random() * (gameRect.width - animalWidth);
+      var baseSpeed = 1.5 + Math.random() * 1.5;
+      var speed = baseSpeed * difficulty;
+
+      var animalEl = document.createElement('div');
+      animalEl.className = 'falling-animal ' + animal.size;
+      animalEl.textContent = animal.emoji;
+      animalEl.style.left = x + 'px';
+      animalEl.style.top = '-80px';
+      animalEl.dataset.name = animal.name;
+      animalEl.dataset.points = animal.points;
+      animalEl.dataset.size = animal.size;
+
+      var uid = Date.now() + Math.random();
+      animalEl.dataset.uid = uid;
+
+      var animalData = {
+        element: animalEl,
+        x: x,
+        y: -80,
+        speed: speed,
+        swayOffset: Math.random() * Math.PI * 2,
+        swaySpeed: 0.02 + Math.random() * 0.02,
+        rotation: 0,
+        uid: uid,
+        name: animal.name,
+        points: animal.points,
+        size: animal.size,
+      };
+
+      fallingAnimals.push(animalData);
+      gameArea.appendChild(animalEl);
+
+      var handleCatch = function(e) {
+        e.stopPropagation();
+        catchAnimal(animalData, e);
+      };
+
+      animalEl.addEventListener('click', handleCatch);
+      animalEl.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        handleCatch(e);
+      }, { passive: false });
+    }
+
+    function catchAnimal(animalData, e) {
+      if (animalData.element.classList.contains('caught')) return;
+
+      animalData.element.classList.add('caught');
+      
+      speakAnimalName(animalData.name);
+      playCatchSound();
+      
+      var clientX = e.clientX || (e.touches && e.touches[0].clientX) || (animalData.x + 40);
+      var clientY = e.clientY || (e.touches && e.touches[0].clientY) || (animalData.y + 40);
+
+      var now = Date.now();
+      if (now - lastCatchTime < 1000) {
+        comboCount++;
+        if (comboCount >= 3) {
+          showCombo(comboCount);
+        }
+      } else {
+        comboCount = 1;
+      }
+      lastCatchTime = now;
+
+      var points = animalData.points;
+      if (comboCount >= 3) {
+        points = Math.floor(points * (1 + comboCount * 0.1));
+      }
+
+      score += points;
+      scoreText.textContent = score;
+      scoreText.classList.remove('pop');
+      void scoreText.offsetWidth;
+      scoreText.classList.add('pop');
+
+      showScorePopup(clientX, clientY, points, animalData.name);
+
+      setTimeout(function() {
+        if (animalData.element.parentNode) {
+          animalData.element.remove();
+        }
+        var filtered = [];
+        for (var fi = 0; fi < fallingAnimals.length; fi++) {
+          if (fallingAnimals[fi].uid !== animalData.uid) {
+            filtered.push(fallingAnimals[fi]);
+          }
+        }
+        fallingAnimals = filtered;
+      }, 400);
+    }
+
+    function showScorePopup(x, y, points, name) {
+      var popup = document.createElement('div');
+      popup.className = 'score-popup';
+      popup.innerHTML = 
+        '<div class="points">+' + points + '</div>' +
+        '<div class="animal-name">' + name + '</div>';
+      
+      var gameRect = gameArea.getBoundingClientRect();
+      popup.style.left = (x - gameRect.left) + 'px';
+      popup.style.top = (y - gameRect.top) + 'px';
+      
+      gameArea.appendChild(popup);
+      
+      setTimeout(function() { popup.remove(); }, 1200);
+    }
+
+    function showCombo(count) {
+      var combo = document.createElement('div');
+      combo.className = 'combo-text';
+      combo.textContent = count + ' 连击！';
+      gameArea.appendChild(combo);
+      setTimeout(function() { combo.remove(); }, 800);
+    }
+
+    function gameLoop() {
+      if (gameState !== 'playing') return;
+
+      var gameRect = gameArea.getBoundingClientRect();
+      var gameHeight = gameRect.height;
+
+      for (var i = fallingAnimals.length - 1; i >= 0; i--) {
+        var animal = fallingAnimals[i];
+        
+        if (animal.element.classList.contains('caught')) continue;
+
+        animal.y += animal.speed;
+        animal.swayOffset += animal.swaySpeed;
+        var swayX = Math.sin(animal.swayOffset) * 20 * difficulty;
+        animal.rotation = Math.sin(animal.swayOffset * 0.7) * 10;
+
+        animal.element.style.transform = 'translate(' + swayX + 'px, 0) rotate(' + animal.rotation + 'deg)';
+        animal.element.style.top = animal.y + 'px';
+
+        if (animal.y > gameHeight + 50) {
+          animal.element.remove();
+          fallingAnimals.splice(i, 1);
+          comboCount = 0;
+        }
+      }
+
+      animationId = requestAnimationFrame(gameLoop);
+    }
+
+    function endGame() {
+      gameState = 'ended';
+      
+      clearInterval(gameTimer);
+      clearTimeout(spawnTimer);
+      cancelAnimationFrame(animationId);
+      stopBackgroundMusic();
+
+      finalScore.textContent = score;
+      
+      if (score >= 500) {
+        endEmoji.textContent = '🏆';
+        encouragement.textContent = '太厉害了！你是动物小专家！🌟';
+      } else if (score >= 300) {
+        endEmoji.textContent = '🎉';
+        encouragement.textContent = '非常棒！你认识了好多动物！👏';
+      } else if (score >= 150) {
+        endEmoji.textContent = '😊';
+        encouragement.textContent = '不错哦！继续加油！💪';
+      } else {
+        endEmoji.textContent = '🌱';
+        encouragement.textContent = '再试一次，你会做得更好！❤️';
+      }
+
+      gameScreen.classList.add('hidden');
+      endScreen.classList.remove('hidden');
+    }
+
+    startBtn.addEventListener('click', startGame);
+    startBtn.addEventListener('touchstart', function(e) {
+      initSpeech();
+      unlockSpeech();
+      fixScreenSize();
+    }, { passive: true });
+    restartBtn.addEventListener('click', startGame);
+    restartBtn.addEventListener('touchstart', function(e) {
+      initSpeech();
+      unlockSpeech();
+      fixScreenSize();
+    }, { passive: true });
+
+    if ('ontouchstart' in window) {
+      handCursor.style.display = 'none';
+    }
+
+    var audioCtx = null;
+    var musicPlaying = false;
+    var musicEnabled = true;
+    var musicInterval = null;
+    var currentNoteIndex = 0;
+
+    var happyMelody = [
+      { note: 523.25, duration: 0.25 },
+      { note: 659.25, duration: 0.25 },
+      { note: 783.99, duration: 0.25 },
+      { note: 659.25, duration: 0.25 },
+      { note: 523.25, duration: 0.25 },
+      { note: 783.99, duration: 0.25 },
+      { note: 659.25, duration: 0.5 },
+      { note: 523.25, duration: 0.25 },
+      { note: 659.25, duration: 0.25 },
+      { note: 880.00, duration: 0.25 },
+      { note: 783.99, duration: 0.25 },
+      { note: 659.25, duration: 0.25 },
+      { note: 523.25, duration: 0.25 },
+      { note: 587.33, duration: 0.5 },
+      { note: 523.25, duration: 0.25 },
+      { note: 659.25, duration: 0.25 },
+      { note: 783.99, duration: 0.25 },
+      { note: 1046.50, duration: 0.25 },
+      { note: 783.99, duration: 0.25 },
+      { note: 659.25, duration: 0.25 },
+      { note: 523.25, duration: 0.5 },
+    ];
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function playNote(frequency, duration, startTime, volume = 0.15) {
+      if (!audioCtx) return;
+      
+      var oscillator = audioCtx.createOscillator();
+      var gainNode = audioCtx.createGain();
+      
+      oscillator.type = 'sine';
+      oscillator.frequency.value = frequency;
+      
+      gainNode.gain.setValueAtTime(0, startTime);
+      gainNode.gain.linearRampToValueAtTime(volume, startTime + 0.02);
+      gainNode.gain.linearRampToValueAtTime(volume * 0.7, startTime + duration * 0.5);
+      gainNode.gain.linearRampToValueAtTime(0, startTime + duration);
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      
+      oscillator.start(startTime);
+      oscillator.stop(startTime + duration);
+    }
+
+    function playCatchSound() {
+      if (!audioCtx || !musicEnabled) return;
+      
+      var now = audioCtx.currentTime;
+      var freqs = [523.25, 659.25, 783.99, 1046.50];
+      
+      for (var fi = 0; fi < freqs.length; fi++) {
+        var freq = freqs[fi];
+        var osc = audioCtx.createOscillator();
+        var gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0, now + fi * 0.05);
+        gain.gain.linearRampToValueAtTime(0.2, now + fi * 0.05 + 0.02);
+        gain.gain.linearRampToValueAtTime(0, now + fi * 0.05 + 0.15);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now + fi * 0.05);
+        osc.stop(now + fi * 0.05 + 0.15);
+      }
+    }
+
+    function startBackgroundMusic() {
+      if (!audioCtx || !musicEnabled || musicPlaying) return;
+      
+      musicPlaying = true;
+      currentNoteIndex = 0;
+      
+      var currentTime = audioCtx.currentTime + 0.1;
+      var tempo = 0.35;
+      
+      function scheduleNotes() {
+        if (!musicPlaying || !musicEnabled) return;
+        
+        while (currentNoteIndex < happyMelody.length) {
+          var note = happyMelody[currentNoteIndex];
+          var duration = note.duration * tempo * 2;
+          
+          if (currentTime < audioCtx.currentTime + 1) {
+            playNote(note.note, duration, currentTime, 0.1);
+            currentTime += duration;
+            currentNoteIndex++;
+          } else {
+            break;
+          }
+        }
+        
+        if (currentNoteIndex >= happyMelody.length) {
+          currentNoteIndex = 0;
+        }
+        
+        musicInterval = requestAnimationFrame(scheduleNotes);
+      }
+      
+      scheduleNotes();
+    }
+
+    function stopBackgroundMusic() {
+      musicPlaying = false;
+      if (musicInterval) {
+        cancelAnimationFrame(musicInterval);
+        musicInterval = null;
+      }
+    }
+
+    function toggleMusic() {
+      initAudio();
+      
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      
+      musicEnabled = !musicEnabled;
+      updateSoundButtons();
+      
+      if (musicEnabled) {
+        if (gameState === 'playing') {
+          startBackgroundMusic();
+        }
+      } else {
+        stopBackgroundMusic();
+      }
+    }
+
+    function updateSoundButtons() {
+      var startBtn = document.getElementById('startSoundBtn');
+      var gameBtn = document.getElementById('gameSoundBtn');
+      var icon = musicEnabled ? '🎵' : '🔇';
+      if (startBtn) startBtn.textContent = icon;
+      if (gameBtn) gameBtn.textContent = icon;
+    }
+
+    function forceBackgroundColor() {
+      document.documentElement.style.backgroundColor = '#87CEEB';
+      document.body.style.backgroundColor = '#87CEEB';
+      if (gameContainer) {
+        gameContainer.style.backgroundColor = '#87CEEB';
+      }
+    }
+
+    function fixScreenSize() {
+      var h = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+      var w = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+      
+      if (gameContainer) {
+        gameContainer.style.width = w + 'px';
+        gameContainer.style.height = h + 'px';
+      }
+      
+      document.body.style.width = w + 'px';
+      document.body.style.height = h + 'px';
+    }
+
+    document.getElementById('startSoundBtn').addEventListener('click', function(e) {
+      e.stopPropagation();
+      initSpeech();
+      unlockSpeech();
+      toggleMusic();
+    });
+
+    document.getElementById('gameSoundBtn').addEventListener('click', function(e) {
+      e.stopPropagation();
+      initSpeech();
+      unlockSpeech();
+      toggleMusic();
+    });
+
+    function onFirstUserInteraction() {
+      forceBackgroundColor();
+      fixScreenSize();
+      initSpeech();
+      unlockSpeech();
+    }
+
+    document.addEventListener('touchstart', function firstTouch(e) {
+      onFirstUserInteraction();
+      document.removeEventListener('touchstart', firstTouch);
+    }, { passive: true });
+
+    document.addEventListener('click', function firstClick(e) {
+      onFirstUserInteraction();
+      document.removeEventListener('click', firstClick);
+    }, true);
+
+    window.addEventListener('resize', fixScreenSize);
+    window.addEventListener('orientationchange', function() {
+      setTimeout(fixScreenSize, 300);
+      setTimeout(forceBackgroundColor, 300);
+    });
+
+    forceBackgroundColor();
+    fixScreenSize();
+    initSpeech();
+  </script>
+</body>
+</html>
+
